@@ -20,6 +20,6 @@ We conducted our analysis in late December 2020 and the datasets have been made 
 The submission files are: 
 
 
-* [Analysis R File](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) (Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx))
-* [Rmd Markdown Submission](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) (Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx))
-* [HTML Submission](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) (Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx))
+* [Analysis R File](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data)
+* [Rmd Markdown Submission](https://github.com/maxlembke/COVID-19_Restaurants-R_Final_Project/blob/main/Team1_Final_Project_v2.1.rmd)
+* [HTML Submission](https://github.com/maxlembke/COVID-19_Restaurants-R_Final_Project/blob/main/Team1_Final_Project_v2.1.html)
