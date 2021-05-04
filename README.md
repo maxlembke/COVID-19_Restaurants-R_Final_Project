@@ -15,7 +15,7 @@ The respective links to each of the datasets and data used are:
 
 * [Food Inspection Data](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) (Too large to provide here - please download at link) 
 
-We conducted our analysis in late December 2020 and the datasets have been made avaialble in this repo. 
+We conducted our analysis in late December 2020. Please be aware that both datasets are updated frequently. The date of retrieval of each dataset are 12/07/2020 and 12/04/2020 for COVID-19 and Food Inspection data, respectively.
 
 The submission files are: 
 
