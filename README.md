@@ -17,4 +17,9 @@ The respective links to each of the datasets and data used are:
 
 We conducted our analysis in late December 2020 and the datasets have been made avaialble in this repo. 
 
-The submission Files are: 
+The submission files are: 
+
+
+* [Analysis R File](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) (Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx))
+* [Rmd Markdown Submission](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) (Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx))
+* [HTML Submission](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) (Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx))
