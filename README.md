@@ -12,9 +12,9 @@ In addition to access to the food inspection data, the city provides dedicated s
 The respective links to each of the datasets and data used are:
 
 * [COVID-19 Data](https://data.cityofchicago.org/Health-Human-Services/COVID-19-Cases-Tests-and-Deaths-by-ZIP-Code/yhhz-zm2v)
-* Assignment COVID-19 Data: [Apprentice Chef Course Case](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice%20Chef%20Course%20Case.pdf)
+**Assignment COVID-19 Data: [Apprentice Chef Course Case](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice%20Chef%20Course%20Case.pdf)
 * [Food Inspection Data](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) 
-* Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx)
+**Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx)
 
 We conducted our analysis in late December 2020 and the datasets have been made avaialble in this repo. 
 
