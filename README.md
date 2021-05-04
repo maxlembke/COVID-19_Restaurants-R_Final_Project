@@ -11,14 +11,13 @@ In addition to access to the food inspection data, the city provides dedicated s
 
 The respective links to each of the datasets and data used are:
 
-* [COVID-19 Data](https://data.cityofchicago.org/Health-Human-Services/COVID-19-Cases-Tests-and-Deaths-by-ZIP-Code/yhhz-zm2v) (Assignment COVID-19 Data: [Apprentice Chef Course Case](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice%20Chef%20Course%20Case.pdf))
+* [COVID-19 Data](https://data.cityofchicago.org/Health-Human-Services/COVID-19-Cases-Tests-and-Deaths-by-ZIP-Code/yhhz-zm2v) (Assignment COVID-19 Data: [Apprentice Chef Course Case](https://github.com/maxlembke/COVID-19_Restaurants-R_Final_Project/blob/main/COVID-19_Cases__Tests__and_Deaths_by_ZIP_Code.csv))
 
 * [Food Inspection Data](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) (Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx))
 
 We conducted our analysis in late December 2020 and the datasets have been made avaialble in this repo. 
 
 The submission files are: 
-
 
 * [Analysis R File](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data)
 * [Rmd Markdown Submission](https://github.com/maxlembke/COVID-19_Restaurants-R_Final_Project/blob/main/Team1_Final_Project_v2.1.rmd)
