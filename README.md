@@ -9,9 +9,13 @@ The data portal of the city provides access to every food inspection conducted b
 
 In addition to access to the food inspection data, the city provides dedicated statistics for COVID-19 cases, tests, and deaths by ZIP code. This is of significance as it can be assumed that the data collection, more precisely the location identifiers are correct and align between the two datasets that provide the foundation of the analysis. 
 
-The respective links to each of the datasets are:
+The respective links to each of the datasets and data used are:
 
 * [COVID-19 Data](https://data.cityofchicago.org/Health-Human-Services/COVID-19-Cases-Tests-and-Deaths-by-ZIP-Code/yhhz-zm2v)
+* Assignment COVID-19 Data: [Apprentice Chef Course Case](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice%20Chef%20Course%20Case.pdf)
 * [Food Inspection Data](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) 
+* Assignment Food Inspection Data: [Apprentice_Chef_Dataset](https://github.com/maxlembke/ML_Classification_Apprentice_Chef/blob/main/Apprentice_Chef_Dataset.xlsx)
 
 We conducted our analysis in late December 2020 and the datasets have been made avaialble in this repo. 
+
+The submission Files are: 
