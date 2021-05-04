@@ -1,0 +1,446 @@
+---
+title: 'Eating out in the Pandemic: Supporting local business or super spreading?'
+author: 'Team 1: Tuty Chau and Max Lembke'
+subtitle: R for Data Science @ Hult International Business School
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    highlight: pygments
+    number_sections: yes
+    theme: readable
+    toc: yes
+    toc_float:
+      collapsed: yes
+---
+
+# Set-up {-}
+  
+```{r load packages, message=FALSE, warning=FALSE}
+library(tidyverse) # Standard package 
+library(lubridate) # A package that makes dealing with date formats significantly easier
+library(reshape2) # Enables improved pivots
+```
+
+# Introduction 
+
+  The COVID-19 pandemic has impacted every sector of the US economy, yet with more individuals remaining at home, food establishments have suffered immensely. Arguably the Food and Beverage Industry (FB) occupies a privileged space in the US economy, with more than 54 billion meals served at over 800 thousand FB establishments per year, accounting for 46% of the total US expenditure on food (Jones et al., 2004). As restrictions have lifted, many rushed to support their local restaurants through takeout, delivery, and compliant dine-in options. Unarguably this is a noble cause and with good intent, especially as restaurants in structurally weaker regions plagued by generations of poverty and ill-health, contribute immensely to the local economy and aid poverty alleviation. Nevertheless, the multiplier effect is not only present in economics – short comings in the safety of the FB industry, are documented throughout academia and can lead to devastating community spreads of food borne diseases (FBD) (City of Chicago, n.d.; Kannan et al., 2019). 
+  
+  The Centers for Disease Controls (CDC) most recent guidance issued on December 4th underscores the pivotal importance of safety within food establishments. The study conducted, identifies visits to restaurants as “particularly high-risk scenarios” as “distancing is often not maintained” and the nature of consuming food and beverages means that the “consistent use of face masks is not possible” (Margaret A. Honein et al., 2020). Furthermore, non-compliance with basic safety measures such as properly washing hands, have a damning effect in the context of a pandemic. Further academic research highlights that stressful situations often lead to negligence on behalf of establishments and their employees, regarding compliance with regulations (Packer et al., 2020; Rizou et al., 2020).
+  
+  Considering the previously outlined research conducted, the value in examining the shifting trends in the restaurant industry due to COVID-19 is evident. To examine these, this analysis will conduct a case-study using food inspection and COVID-19 case data, from the city of Chicago. Firstly, this analysis will set a baseline of the timeframe under consideration through analyzing the spread of COVID-19. Secondly, the economic implications for the sector shall be examined. Next, trends in food safety violations will be explored and a model constructed, to examine the relationship between food-safety violations and COVID-19 community spread. 
+  
+  This analysis shall argue, that although the economic implications, examined by the amount of business closures, has been cushioned through a combination of local support and loans, a wave of closures should be expected once these financial means run out. Further, it shall be outlined that although the count of food violations has not increased in comparison to previous years, pressure from local authorities is not as high and further analysis highlights a clear relationship between food safety violations and the spread of COVID-19 in the respective area. An alarming signal, that should not be responded to with fines or worse more closures of local businesses that have a positive impact on local communities but by instituting new policies that help businesses to stop the spread effectively. 
+
+# Data 
+## Background
+
+In order to examine the changes induced by the COVID-19 pandemic on the restaurant industry in Chicago effectively, the following analysis relies on the extensive access provided via the Chicago Data Portal. 
+
+The portal provides access to every food inspection conducted by the city’s Department of Public Health. Each inspection that is conducted by one of the approximately 30 inspectors is recorded including various identifiers of the business, their risk class, general state (is it out of business etc.), violations found and instructions given to the business based on findings. 
+
+In addition to access to the food inspection data, the city provides dedicated statistics for COVID-19 cases, tests, and deaths by ZIP code. This is of significance as it can be assumed that the data collection, more precisely the location identifiers are correct and align between the two datasets that provide the foundation of the analysis. 
+
+The respective links to each of the datasets are:
+
+* [COVID-19 Data](https://data.cityofchicago.org/Health-Human-Services/COVID-19-Cases-Tests-and-Deaths-by-ZIP-Code/yhhz-zm2v)
+* [Food Inspection Data](https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5/data) 
+
+*(Please be aware that both datasets are updated frequently. The date of retrieval of each dataset are 12/07/2020 and 12/04/2020 for COVID-19 and Food Inspection data, respectively.)*
+
+```{r load data, message=FALSE, warning=FALSE}
+Org_C_Data <- read_csv("COVID-19_Cases__Tests__and_Deaths_by_ZIP_Code.csv")
+Org_Chi_Data <- read_csv("Food_Inspections.csv")
+
+covid_df <- data.frame(Org_C_Data)
+chi_df <- data.frame(Org_Chi_Data)
+```
+
+## Data cleaning, variable creation etc. 
+
+<details><summary>Click here to view respective code</summary>
+<p>
+
+```{r Data cleaning - variable creation - df creations, message=FALSE, warning=FALSE}
+# Dropping un-useful variables
+covid_df <- covid_df[-c(20:21)]
+chi_df <- subset(chi_df, select = -c(City, State, Location))
+
+# Renaming variables for COVID and Chicago data
+covid_df = covid_df %>% 
+  rename(
+    zip = ZIP.Code,
+    week_num = Week.Number,
+    week_st = Week.Start,
+    week_end = Week.End,
+    cases_wkl = Cases...Weekly,
+    cases_cum = Cases...Cumulative,
+    case_rate_wkl = Case.Rate...Weekly,
+    case_rate_cum = Case.Rate...Cumulative,
+    test_wkl = Tests...Weekly,
+    test_cum = Tests...Cumulative,
+    test_rate_wkl = Test.Rate...Weekly,
+    test_rate_cum = Test.Rate...Cumulative,
+    prcnt_pos_wkl = Percent.Tested.Positive...Weekly,
+    prcnt_pos_cum = Percent.Tested.Positive...Cumulative,
+    deaths_wkl = Deaths...Weekly,
+    deaths_cum = Deaths...Cumulative,
+    death_rate_wkl = Death.Rate...Weekly,
+    death_rate_cum = Death.Rate...Cumulative
+  )
+
+chi_df = chi_df %>% 
+  rename(
+    ins_id = Inspection.ID,
+    d_name = DBA.Name, 
+    a_name = AKA.Name,
+    lic_num = License..,
+    type = Facility.Type,
+    risk = Risk,
+    addr = Address,
+    zip = Zip,
+    ins_date = Inspection.Date,
+    ins_type = Inspection.Type,
+    results = Results,
+    vio = Violations,
+    lat = Latitude,
+    long = Longitude
+  )
+
+
+# Filling NA's with 0 to avoid bugs
+covid_df[is.na(covid_df)] <- 0
+chi_df[is.na(chi_df)] <- 0
+
+# Establishing type cleaning
+covid_df$zip <- as.numeric(covid_df$zip)
+covid_df$week_st <- as.Date(covid_df$week_st, format = "%m/%d/%y", origin = "%m/%d/%y")
+covid_df$week_end <- as.Date(covid_df$week_end, format = "%m/%d/%y", origin = "%m/%d/%y")
+
+chi_df$ins_date <- as.Date(chi_df$ins_date, format = "%m/%d/%y", origin = "%m/%d/%y")
+
+# Converting Risk Class to numeric for easier analysis 
+chi_df$risk [chi_df$risk == "Risk 1 (High)"] <- 1
+chi_df$risk [chi_df$risk == "Risk 2 (Medium)"] <- 2
+chi_df$risk [chi_df$risk == "Risk 3 (Low)"] <- 3
+chi_df$risk <- as.integer(chi_df$risk)
+
+#Cleaning different classes of restaurant to one unified spelling 
+chi_df$type <-tolower(chi_df$type) #Changing the case 
+chi_df$type2 = chi_df$type # Copying the column to preserve original data 
+chi_df$type2 <- str_replace_all(chi_df$type2, "^(rest).*", "restaurant") #Replacing all strings starting with rest to restaurant 
+chi_df$type2[chi_df$type2 != "restaurant"] <- 0 #Converting all other business types to 0 
+
+
+# Creating a count of the violations per inspection 
+
+data_vio <- select(chi_df, c(ins_id, vio)) 
+
+# Creating a function that counts the amount of violations per inspection
+get_violations = function(x){
+  n_violations = vector("double", length = length(x))
+  for(i in seq_along(x)){
+    n_violations[i] = x[i] %>% 
+      str_match_all("[0-9]+\\.\\s") %>% 
+      unlist() %>% 
+      length()
+  }
+  return(n_violations)
+}
+
+# Mapping the data and creating the new column 
+data_vio$n_violations = data_vio %>% 
+  select(vio) %>% 
+  map(get_violations) %>% 
+  unlist()
+
+# Dropping the violation before joining as already present 
+data_vio <- subset(data_vio, select = -c(vio))
+
+# Left join on the original dataframe with all inspection data 
+chi_df <- left_join(data_vio, chi_df, by = "ins_id")
+
+# Changing name
+chi_df = chi_df %>% 
+  rename(vio_n = n_violations)
+
+# Creating week column 
+chi_df$ins_date2 = chi_df$ins_date
+chi_df$ins_date2 <- isoweek(chi_df$ins_date2)
+
+# Creating week column 
+chi_df$ins_date3 = chi_df$ins_date
+chi_df$ins_date3 <- isoyear(chi_df$ins_date3)
+
+# Creating the COVID/Food violation df 
+df_com = chi_df %>%
+  filter(ins_date3 == 2020 & ins_date2 >= 10)%>% #Only pre, not after trend and weeks >= as COVID records start in 10 
+  group_by(ins_date2, zip)%>%
+  summarise(number_vio = sum(vio_n))
+
+df_com = df_com %>% 
+  rename(week_num = ins_date2)
+
+df_com <- left_join(df_com,covid_df, by = c("zip" = "zip", "week_num" = "week_num"))
+
+
+# Ceating df violations over time + as percentace
+
+  #Violations in 2020 
+new_df = chi_df %>% 
+  filter(chi_df$ins_date > as.Date("2019-12-31"))
+
+  #Violations all years
+df2 = chi_df %>% 
+  group_by(ins_date3, ins_date2)%>%
+  summarise(count_insp = n(),number = sum(vio_n))
+  
+  #Calculations of percentage 
+df2$vio_as_per = NA
+df2$vio_as_per = (df2$number/df2$count_insp)*100
+
+# DF for out-of-business creation 
+
+  # New df with all types, counts of inspections, excluding the post trend 
+count_insp_y <- chi_df %>%
+  filter(chi_df$ins_date2 < 50)%>%
+  group_by(year = isoyear(ins_date)) %>%
+  summarise(count=n())
+
+  # New df with all types, with count of out of business, excluding the post trend 
+count_out_y <- chi_df %>%
+  filter(chi_df$ins_date2 < 50)%>%
+  filter(results == "Out of Business") %>%
+  group_by(results,year = isoyear(ins_date)) %>%
+  summarise(number = n())
+
+  # Joining the two df together, on year
+out_all_df <- left_join(count_insp_y, count_out_y, by = "year")
+out_all_df <- data.frame(out_all_df)
+out_all_df$all_out_per = NA #Creating new column  
+out_all_df$all_out_per <- (out_all_df$number/out_all_df$count)*100   #Percentage calc
+out_all_df <- subset(out_all_df, select = -c(count, results, number)) #Dropping unneeded columns 
+
+  # New df only restaurants, counts of inspections, excluding the post trend 
+count_insp_y <- chi_df %>%
+  filter(chi_df$type2 != 0 & chi_df$ins_date2 < 50)%>%
+  group_by(year = isoyear(ins_date)) %>%
+  summarise(count=n())
+
+  # New df only restaurants, counts of out of business, excluding the post trend 
+count_out_y <- chi_df %>%
+  filter(chi_df$type2 != 0 & chi_df$ins_date2 < 50)%>%
+  filter(results == "Out of Business") %>%
+  group_by(results,year = isoyear(ins_date)) %>%
+  summarise(number = n())
+
+  # Joining the two df together, on year
+out_re_df <- left_join(count_insp_y, count_out_y, by = "year")
+out_re_df$res_out_per = NA #Creating new column  
+out_re_df <- data.frame(out_re_df) 
+out_re_df$res_out_per <- (out_re_df$number/out_re_df$count)*100 #Percentage calc
+out_re_df <- subset(out_re_df, select = -c(count, results, number))#Dropping unneeded columns 
+
+  # Joining all the df together
+out_of_b <- left_join(out_re_df, out_all_df, by = "year")
+
+#Modeling Df
+
+`%notin%` <- Negate(`%in%`) #Creating not in
+
+#Creating df for modelling (log)
+df_com_2 = df_com %>% 
+  filter(week_num < 49)%>% #Filtering out other weeks that have not submitted data
+  filter(zip %notin% c("60666","0","60201","60455"))%>% #Exlcuding zip without data (collection error)
+  group_by(zip)%>% 
+  summarise(vio = sum(number_vio), cases = sum(case_rate_wkl))
+
+df_com_2$l_vio = log(df_com_2$vio)  
+df_com_2$l_cases = log(df_com_2$cases)
+```
+
+</p>
+</details>
+
+# Analysis 
+
+## The feared second wave 
+
+The City of Chicago has, like many others, experienced two distinct waves of the virus. Whilst the first wave occurred from approximately Week 10 to Week 25 and was met with swift measures such as the closing of restaurants (indicated by a red dot), Chicago experienced a “second-wave” after opening its businesses (green dot) starting in Week 40. 
+
+```{r COVID-19 Cases over time in Chicago, message=FALSE, warning=FALSE}
+covid_df %>% 
+  group_by(week_num) %>% 
+  summarise(sum_cases = sum(cases_wkl)) %>% 
+  ggplot(data = ., mapping = aes(x = week_num, y = sum_cases)) +
+  geom_line() +
+  geom_point() + 
+  geom_point(aes(x=26,y=1336),colour="green", size=4) + 
+  geom_point(aes(x=12,y=882),colour="red", size=4) +
+  labs(title = "COVID cases over time",
+       x = "Week number",
+       y = "Total cases")
+```
+Though academic consensus cannot be described as established, preliminary research suggests this being rooted in human nature. After having followed precautions, such as physical distancing, handwashing, and mask-wearing, many have become lax with these measures (Maragakis, 2020). In addition, the lifting of restrictions in combination with “fewer people wearing masks, and more are gathering indoors to eat, drink” has led to the significant uptick in cases (Maragakis, 2020). Though we can all understand the eagerness in being able to explore the outside again and resume regular activities, this is an alarming trend. 
+
+When observing the trend above closely, an obvious relationship between the re-opening of FB establishments is not directly evident. Arguably, the transmission of the virus is a more complex affair than observing such a simple relationship. Lag times in both the transmission, ability to diagnose and testing results contribute accordingly. Whilst opponents of further freedom curtailing measures might now point to the devastating effects on the local economy, especially restaurants, one should not jump to conclusion. 
+
+
+## Supporting Businesses: The economic fallout 
+
+The inspection data published by the City of Chicago provides unprecedented insight into the current FB landscape. Inspectors that go out to canvass the establishments record the state of the business, including if it has gone out of business. Contrary to data available from a chamber of commerce or other institutions, their observation is recorded before the business enters bankruptcy and goes out of business. 
+
+<details><summary>View the amount of "Out of Business" Restaurants </summary>
+<p>
+```{r Restaurants out of business, message=FALSE, warning=FALSE}
+chi_df %>%
+  filter(chi_df$type2 != 0 & chi_df$ins_date2 < 50)%>%
+  filter(results == "Out of Business") %>%
+  group_by(results,year = isoyear(ins_date)) %>%
+  summarise(number = n())%>%
+  ggplot(data = ., mapping = aes(as.factor(year), y = number, fill = results )) + 
+  geom_col(fill = "lightblue") + 
+  labs(title = "Restaurants out of business",
+       x = "Year",
+       y = "Number of businesses")
+```
+</p>
+</details>
+
+
+<p>
+Examining the number of Restaurants that were recorded “out-of-business” in Chicago, a common perception seems shattered; less restaurants seemed to have closed from 2019 to 2020, 950 vs. 627 respectively. Though one could argue that the current year has not ended yet, this delta is large and unlikely to be shifted when examining previous trends. This begs the question as to why current popular discourse has shifted nearly to a new “Support your local business” Zeitgeist. 
+
+A closer investigation into the underlying variables sheds some light on this. It becomes evident, that the amount of “Out-of-business” observations is highly dependent on the inspections conducted. 
+</p>
+
+```{r Out of business percentage, message=FALSE, warning=FALSE}
+data_long <- melt(out_of_b, id="year")
+
+ggplot(data_long, aes(x=factor(year), y= value, color = variable, group = variable)) +
+   geom_line() +
+  labs(title = "Out of business as a percentage of inspections",
+       x = "Year",
+       y = "Percentage")
+```
+
+Accounting for this variation, a clearer picture emerges. Though less restaurants seemed to have been affected by the pandemic, other FB establishments have gone out-of-business at a disproportionate rate to the previous years. It should be noted that this could be due to the various Coronavirus Relief Options, in specific Paycheck Protection Programs that have been instituted. One can assume, that a wave of businesses will suffer bankruptcy once funds run out. Further, one should not discount the various hardships such as a decrease in revenue and other cashflow issues that create a burden on the industry. 
+
+## Community Spread: A model
+
+The potential effects of the increased financial pressures have been acknowledged throughout academia. Increased pressures, arising from stressful situations often lead to negligence on behalf of establishments and their employees, regarding compliance with regulations (Packer et al., 2020; Rizou et al., 2020).
+
+To establish a potential relationship between food safety and COVID-19 cases, one first needs to understand the violations found in inspections in 2020 and the previous years. In comparison to the previous years, it is obvious that violations in 2019 and the second half of 2018 disproportionally increased. It should be noted, that in the middle of 2018 new regulations such as new safety trainings, allergen trainings and cleaning procedures were introduced (City of Chicago, n.d.). Several articles in the Chicago area highlight the difficulty many businesses had in complying with these new regulations, providing explanatory power for the steeper slope in comparison to the beginning of 2018 and 2017 (Mary Wilkie, 2018).  
+
+
+```{r Cumulative Violations over time, message=FALSE, warning=FALSE}
+myColors <- c("#51397F", "#3950E5", "#396B7F","#0CF4FC")
+df2 %>% 
+  filter(ins_date3 %in% c("2020","2019","2018","2017"))%>%
+  group_by(ins_date3)%>%
+  mutate(ins_date2, number = cumsum(number))%>% 
+  ggplot(data = ., mapping = aes(x = ins_date2, y = number, color = factor(ins_date3))) +
+  geom_line() + 
+  geom_point()+
+  scale_color_manual(values=myColors)+
+  labs(title = "Cumulative violations over time",
+       x = "Week number",
+       y = "Number of violations")
+```
+
+In addition to the change in gradient in 2019, the lack of violations found in 2020 is apparent. One could argue that this indicates less violations being committed, a similar lurking variable namely the number of inspections needs to be considered as in the economic impact evaluation. The impact of an apparent decrease becomes further evident when examining the count of violations for every month. The pattern in 2020 in comparison to the previous years indicates a steady decrease in violations, in addition to the divergence from a regular pattern. Hence it can be concluded that the significant decrease in violations found is due to the lack of inspections and pressure on the businesses. This furthers the hypothesis, of a relationship between food safety and COVID-19 infections, as many violations might not have been discovered contributing immensely to the spread. 
+
+<details><summary>View the amount of violations per month </summary>
+<p>
+
+```{r Violations over time, message=FALSE, warning=FALSE}
+myColors <- c("#51397F", "#3950E5", "#396B7F","#0CF4FC")
+df2 %>% 
+  filter(ins_date3 %in% c("2020","2019","2018","2017"))%>%
+  group_by(ins_date3)%>%
+  mutate(ins_date2, number = number)%>% 
+  ggplot(data = ., mapping = aes(x = ins_date2, y = number, color = factor(ins_date3))) +
+  geom_line() + 
+  geom_point()+
+  scale_color_manual(values=myColors)+
+  labs(title = "Violations over time",
+       x = "Week number",
+       y = "Number of violations")
+```
+</p>
+</details>
+
+<p>
+
+The model established, confirms the epidemiologic and medical conclusions formed, there is a relationship between food safety (denominated in violations) and COVID-19 cases in an area (ZIP). In specific, a logarithmic relationship is present indicating that for every 1% increase in violations, COVID-19 infections increase by approximately 76%. A damming prospect. 
+
+The coefficient is significant because the probability of 3.64e-09 is inside the level of significance of 0.5. 
+
+</p>
+
+<details><summary>View model details here </summary>
+<p>
+
+*Model Plot* 
+
+```{r Relationship between cases and violations per zip, message=FALSE, warning=FALSE}
+df_com_2 %>% 
+  filter(l_cases > 0)%>%
+  ggplot(data = ., aes(x = l_vio, y = l_cases)) +
+  geom_point() +
+  geom_smooth(method ="lm")
+```
+*Model Summary* 
+
+```{r Model, message=FALSE, warning=FALSE}
+model = df_com_2 %>%
+  lm(formula = l_vio ~ l_cases, data = .)
+
+model %>% 
+  summary()
+```
+*Residual Plot* 
+
+```{r Model Plot Residuals, message=FALSE, warning=FALSE}
+model %>% 
+  broom::augment()%>% 
+  ggplot(.,aes(x=.resid))+ 
+  geom_histogram()
+```
+
+</p>
+</details>
+
+# Conclusion & Recommendations 
+
+The conducted analysis and modelling has shed some vital insights on the effect of the pandemic on the FB industry in Chicago. The pandemic, especially the second wave experienced in Chicago, has hit the community severely. As foreseen by many experts in the field, re-opening has spurred the spike in cases known as the second wave. Though suffering for everyone from front-line workers to FB employees and business owners is immense, the positive effect of Coronavirus Relief Options highlighted in this analysis, that have helped in preventing business closures needs to be noted. Such economic relief programs need to be extended and broadened to continue to support local industries especially in the context of a second wave and new restrictions.  Furthermore, the analysis of food violations has exemplified a decrease in control of the sector and a highly concerning relationship between violations and COVID-19 cases in local communities. 
+
+Though one could argue that the only response should be a closure of all FB establishments, a more moderate and supportive approach should be considered. Cities need to increase controls of the establishments. This will help to enforce vital guidelines and provide an opportunity to educate. If these provide ineffective, fines can be increased, and other measures can be adopted. As already a established principle in corporate governance, ensuring compliance cannot be achieved through punishment but through prevention and changing mindsets. 
+
+In conclusion, it should also be noted, that this paper provides ample room for further investigation and analysis. Constrained by time, resources and to a certain extent skill, many factors were not considered resulting in this analysis barley scratching the figurative surface. In addition to taking the different types of violations committed into account when investigating a relationship, time needs to be considered far more thoroughly. Accounting more precisely for when what type of violation was observed and resulted in cases at a particular time, should enable the construction of a more precise model. Furthermore, variation needs to be accounted more effectively. The data frames prepared in this analysis would undoubtably allow for all and the consideration of many more factors (such as the different risk types of FB businesses), yet this was outside of the scope of this paper. 
+
+
+# References
+
+City of Chicago. (n.d.). Food Inspection Forecasting. CARTO. Retrieved December 6, 2020, from https://chicago.carto.com/builder/c2b6567c-d9b0-4fe6-97cf-f7134baf3fd4/embed
+
+City of Chicago. (n.d.). FOOD INSPECTION VIOLATIONS CHANGES. Chicago. Retrieved December 20, 2020, from https://dev.cityofchicago.org/
+
+David Lewis, Russell Hofvendahl, & Jason Trager. (n.d.). Revisiting Food-Safety Inspections from the Chicago Dataset. Sustainabilist. Retrieved December 6, 2020, from https://www.sustainabilist.com/blog/chicago-data-analysis-a-internship-project
+
+de Freitas, R. S. G., & Stedefeldt, E. (2020). COVID-19 pandemic underlines the need to build resilience in commercial restaurants’ food safety. Food Research International, 136, 109472. https://doi.org/10.1016/j.foodres.2020.109472
+
+Jones, T. F., Pavlin, B. I., LaFleur, B. J., Ingram, L. A., & Schaffner, W. (2004). Restaurant Inspection Scores and Foodborne Disease. Emerging Infectious Diseases, Volume 10, Number 4. https://doi.org/10.3201/eid1004.030343
+
+Kannan, V., Shapiro, M. A., & Bilgic, M. (2019). Hindsight Analysis of the Chicago Food Inspection Forecasting Model. ArXiv:1910.04906 [Cs, Stat]. http://arxiv.org/abs/1910.04906
+
+Margaret A. Honein, Athalia Christie, Neil Gupta, Dale A. Rose, John T. Brooks, Dana Meaney-Delman, Amanda Cohn, Erin K. Sauber-Schatz, Allison Walker, Clifford McDonald, Leandris C. Liburd, & Jeffrey E. Hal. (2020). Summary of Guidance for Public Health Strategies to Address High Levels of Community Transmission of SARS-CoV-2 and Related Deaths, December 2020. MMWR. Morbidity and Mortality Weekly Report, 69. https://doi.org/10.15585/mmwr.mm6949e2
+
+Maragakis, L. L. (2020, November 17). Coronavirus Second Wave? Why Cases Increase | Johns Hopkins Medicine. https://www.hopkinsmedicine.org/health/conditions-and-diseases/coronavirus/first-and-second-waves-of-coronavirus
+
+Mary Wilkie. (2018, September 14). New Chicago Health Code in Effect: What Restaurants Need to Know—Illinois Restaurant Association. https://www.illinoisrestaurants.org/news/418294/New-Chicago-Health-Code-in-Effect-What-Restaurants-Need-to-Know.htm
+
+Packer, S., Day, J., Hardman, P., Cameron, J., Kennedy, M., Turner, J., Willis, C., Amar, C., Nozad, B., & Gobin, M. (2020). A cohort study investigating a point source outbreak of Clostridium perfringens associated with consumption of roasted meat and gravy at a buffet on Mothering Sunday 2018, South West, England. Food Control, 112, 107097. https://doi.org/10.1016/j.foodcont.2020.107097
+
+Rizou, M., Galanakis, I. M., Aldawoud, T. M. S., & Galanakis, C. M. (2020). Safety of foods, food supply chain and environment within the COVID-19 pandemic. Trends in Food Science & Technology, 102, 293–299. https://doi.org/10.1016/j.tifs.2020.06.008
