@@ -21,4 +21,3 @@ The submission files are:
 
 * [Analysis R File](https://github.com/maxlembke/COVID-19_Restaurants-R_Final_Project/blob/main/Team1_Final_Project_R.R)
 * [Rmd Markdown Submission](https://github.com/maxlembke/COVID-19_Restaurants-R_Final_Project/blob/main/Team1_Final_Project_v2.1.rmd)
-* [HTML Submission](https://github.com/maxlembke/COVID-19_Restaurants-R_Final_Project/blob/main/Team1_Final_Project_v2.1.html)
